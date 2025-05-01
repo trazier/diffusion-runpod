@@ -11,8 +11,12 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements file
 COPY requirements.txt .
 
-# Install Python dependencies
+# Install Python dependencies - explicitly install runpod first
+RUN pip install --no-cache-dir runpod==1.3.0
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Make sure runpod is installed correctly
+RUN pip list | grep runpod
 
 # Copy source code
 COPY . .
@@ -24,5 +28,5 @@ ENV PYTHONUNBUFFERED=1
 # Expose port for RunPod
 EXPOSE 8000
 
-# Command to run the handler
+# Command to run the handler - use full path to python
 CMD ["python", "-m", "runpod.serverless.start", "--handler", "handler"]
