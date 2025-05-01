@@ -1,32 +1,39 @@
-FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
-
-WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements file
-COPY requirements.txt .
-
-# Install Python dependencies - explicitly install runpod first
-RUN pip install --no-cache-dir runpod==1.3.0
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Make sure runpod is installed correctly
-RUN pip list | grep runpod
-
-# Copy source code
-COPY . .
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
 
 # Set environment variables
-ENV PYTHONPATH=/app
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    DEBIAN_FRONTEND=noninteractive \
+    TZ=UTC
 
-# Expose port for RunPod
-EXPOSE 8000
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.10 \
+    python3-pip \
+    python3-dev \
+    git \
+    wget \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Command to run the handler - use full path to python
-CMD ["python", "-m", "runpod.serverless.start", "--handler", "handler"]
+# Create a symbolic link for python
+RUN ln -sf /usr/bin/python3.10 /usr/bin/python
+
+# Upgrade pip
+RUN python -m pip install --upgrade pip
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements file and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application files
+COPY . .
+
+# Make the start script executable
+RUN chmod +x start.sh
+
+# Start the application
+CMD ["/app/start.sh"]
