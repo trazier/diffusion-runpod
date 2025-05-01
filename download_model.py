@@ -5,11 +5,10 @@ def download_model():
     print("Downloading Stable Diffusion model...")
     model_id = "runwayml/stable-diffusion-v1-5"
     
-    # Download the model
+    # Download the model - removed invalid revision parameter
     pipe = StableDiffusionPipeline.from_pretrained(
         model_id,
         torch_dtype=torch.float16,
-        revision="fp16",
         safety_checker=None
     )
     

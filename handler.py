@@ -16,11 +16,10 @@ def initialize_model():
         print("Initializing Stable Diffusion model...")
         model_id = "runwayml/stable-diffusion-v1-5"  # A stable, reliable model
         
-        # Load the model with optimizations
+        # Load the model with optimizations - removed invalid revision parameter
         pipe = StableDiffusionPipeline.from_pretrained(
             model_id,
             torch_dtype=torch.float16,
-            revision="fp16",
             safety_checker=None  # Optional: Disable safety checker for speed
         )
         
@@ -128,6 +127,9 @@ def handler(event):
         }
     
     except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Error handling request: {error_trace}")
         return {"error": str(e)}
 
 # Start the serverless handler
