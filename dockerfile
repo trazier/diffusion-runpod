@@ -36,7 +36,7 @@ COPY . .
 RUN chmod +x start.sh
 
 # Run debug script
-RUN /app/debug.sh
+# RUN /app/debug.sh
 
 # Start the application
 CMD ["/app/start.sh"]
